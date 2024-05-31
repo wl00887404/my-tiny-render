@@ -1,23 +1,23 @@
 class Ticker {
-  fps = 60;
   lastTimestamp: number | undefined = undefined;
   callbacks: Function[] = [];
-  start = () => {
+  stopFlag = false;
+
+  start() {
+    this.stopFlag = false;
     window.requestAnimationFrame(this.update);
-  };
+  }
+
+  stop() {
+    this.stopFlag = true;
+  }
 
   update = (timestamp: number) => {
-    const frameDuration = 1000 / this.fps;
-    const frames = this.lastTimestamp
-      ? Math.floor((timestamp - this.lastTimestamp) / frameDuration)
-      : 1;
+    const deltaTime = this.lastTimestamp ? timestamp - this.lastTimestamp : 0;
+    this.callbacks.forEach(callback => callback(deltaTime));
 
-    this.callbacks.forEach(callback => callback(frames));
-
-    this.lastTimestamp = this.lastTimestamp
-      ? this.lastTimestamp + frames * frameDuration
-      : timestamp;
-    window.requestAnimationFrame(this.update);
+    this.lastTimestamp = timestamp;
+    if (!this.stopFlag) window.requestAnimationFrame(this.update);
   };
 }
 

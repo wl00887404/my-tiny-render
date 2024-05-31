@@ -6,7 +6,7 @@ const t2 = vector.makeVector(1, 0, -Math.sqrt(3) / 3, 1);
 const t3 = vector.makeVector(-1, 0, -Math.sqrt(3) / 3, 1);
 const t4 = vector.makeVector(0, Math.sqrt(8 / 3), 0, 1);
 
-// 正三角錐
+// 邊長為 2 的正三角錐
 export const tetrahedron: Primitive = [
   [t1, t2, t3],
   [t1, t2, t4],
@@ -24,6 +24,7 @@ const c6 = vector.makeVector(-1, 1, 1, 1);
 const c7 = vector.makeVector(-1, 1, -1, 1);
 const c8 = vector.makeVector(1, 1, -1, 1);
 
+// 邊長為 2 的 正方體
 export const cube: Primitive = [
   [c1, c2, c3, c4],
   [c5, c6, c7, c8],
