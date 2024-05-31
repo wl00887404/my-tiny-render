@@ -25,8 +25,16 @@ const main = () => {
   let xRotation = 0;
   let yRotation = 0;
   let zRotation = 0;
+  const rotateSpeed = 0.5;
 
   const canvas = init(width, height);
+  const input = {
+    x: false,
+    y: false,
+    z: false,
+    shift: false,
+  };
+
   app.append(canvas);
 
   const MVP = compose(
@@ -41,17 +49,27 @@ const main = () => {
   const ticker = new Ticker();
 
   window.onkeydown = e => {
-    const direction = e.shiftKey ? -1 : 1;
-    if (e.keyCode === 88) {
-      xRotation += (Math.PI / 180) * direction;
-    } else if (e.keyCode === 89) {
-      yRotation += (Math.PI / 180) * direction;
-    } else if (e.keyCode === 90) {
-      zRotation += (Math.PI / 180) * direction;
-    }
+    const key = e.key.toLowerCase();
+    if (key !== 'x' && key !== 'y' && key !== 'z' && key != 'shift') return;
+    input[key] = true;
   };
 
-  ticker.callbacks.push((_deltaTime: number) => {
+  window.onkeyup = e => {
+    const key = e.key.toLowerCase();
+    if (key !== 'x' && key !== 'y' && key !== 'z' && key != 'shift') return;
+    input[key] = false;
+  };
+
+  ticker.callbacks.push((deltaTime: number) => {
+    const direction = input.shift ? -1 : 1;
+    if (input.x) {
+      xRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
+    } else if (input.y) {
+      yRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
+    } else if (input.z) {
+      zRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
+    }
+
     const transform = compose(
       translate(0, 0, -20),
       rotateZ(zRotation),
