@@ -10,7 +10,7 @@ export const init = (width: number, height: number) => {
   return canvas;
 };
 
-export const drawPrimitive = (
+export const strokePrimitive = (
   ctx: CanvasRenderingContext2D,
   primitive: Primitive,
   MVP: Matrix,
@@ -38,7 +38,7 @@ export const drawPrimitive = (
 
 const canvas = {
   init,
-  drawPrimitive,
+  strokePrimitive,
 };
 
 export default canvas;

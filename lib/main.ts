@@ -1,4 +1,4 @@
-import { drawPrimitive, init } from './canvas';
+import { strokePrimitive, init } from './canvas';
 import { compose } from './matrix';
 import {
   translate,
@@ -64,9 +64,11 @@ const main = () => {
     const direction = input.shift ? -1 : 1;
     if (input.x) {
       xRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
-    } else if (input.y) {
+    }
+    if (input.y) {
       yRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
-    } else if (input.z) {
+    }
+    if (input.z) {
       zRotation += rotateSpeed * (Math.PI / 180) * direction * deltaTime;
     }
 
@@ -78,7 +80,7 @@ const main = () => {
       scale(8),
     );
     ctx.clearRect(0, 0, width, height);
-    drawPrimitive(ctx, primitives.cube, compose(MVP, transform));
+    strokePrimitive(ctx, primitives.cube, compose(MVP, transform));
   });
   ticker.start();
 };
