@@ -1,6 +1,6 @@
 import matrix from './matrix';
 import vector from './vector';
-import { Matrix, Primitive } from './types';
+import { Matrix, Primitive, Vector } from './types';
 
 export const init = (width: number, height: number) => {
   const canvas = document.createElement('canvas');
@@ -93,9 +93,29 @@ const fillTriangle = (
   bottom = Math.ceil(bottom);
   left = Math.floor(left);
 
+  const [aPoint, bPoint, cPoint] = trianglePositions;
+  const a = vector.makeVector(aPoint[0], aPoint[1], 0, 1);
+  const b = vector.makeVector(bPoint[0], bPoint[1], 0, 1);
+  const c = vector.makeVector(cPoint[0], cPoint[1], 0, 1);
+
+  const triangleCross = vector.cross(
+    vector.subtract(b, a),
+    vector.subtract(c, a),
+  );
+
+  // 三角形面積應該是外積除以 2
+  // 但後續要做比例，所以就不除了
+  const triangleArea = vector.length(triangleCross);
+
   for (let x = left; x < right; x++) {
     for (let y = top; y < bottom; y++) {
-      const baryCoords = getBaryCoords([x + 0.5, y + 0.5], trianglePositions);
+      const baryCoords = getBaryCoords(
+        [x + 0.5, y + 0.5],
+        a,
+        b,
+        c,
+        triangleArea,
+      );
 
       if (!baryCoords) continue;
 
@@ -115,13 +135,12 @@ const fillTriangle = (
 
 export const getBaryCoords = (
   pos: number[],
-  trianglePositions: number[][],
+  a: Vector,
+  b: Vector,
+  c: Vector,
+  triangleArea: number,
 ): number[] | undefined => {
   let crossUpCount = 0;
-  const [aPos, bPos, cPos] = trianglePositions;
-  const a = vector.makeVector(aPos[0], aPos[1], 0, 1);
-  const b = vector.makeVector(bPos[0], bPos[1], 0, 1);
-  const c = vector.makeVector(cPos[0], cPos[1], 0, 1);
   const p = vector.makeVector(pos[0], pos[1], 0, 1);
 
   // 為了再來計算 area
@@ -143,15 +162,6 @@ export const getBaryCoords = (
   const isInsideTriangle = crossUpCount === 3 || crossUpCount === -3;
 
   if (!isInsideTriangle) return undefined;
-
-  const triangleCross = vector.cross(
-    vector.subtract(b, a),
-    vector.subtract(c, a),
-  );
-
-  // 三角形面積應該是外積除以 2
-  // 但後續要做比例，所以就不除了
-  const triangleArea = vector.length(triangleCross);
 
   return crosses.map(cross => {
     return vector.length(cross) / triangleArea;
