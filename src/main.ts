@@ -1,3 +1,4 @@
 import main from '../lib/main';
 
-main();
+// main.stroke();
+main.fill();

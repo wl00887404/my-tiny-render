@@ -1,9 +1,9 @@
 import { Matrix } from './types';
 
 const makeArray = (length: number) => Array.from<any>({ length });
-export const makeMatrix = (r: number, c: number): Matrix => {
+export const makeMatrix = (r: number, c: number, initialValue = 0): Matrix => {
   return makeArray(r).map(() => {
-    return makeArray(c).map(() => 0);
+    return makeArray(c).map(() => initialValue);
   });
 };
 
@@ -105,6 +105,7 @@ export const compose = (...ms: Matrix[]) => {
 };
 
 const matrix = {
+  makeMatrix,
   size,
   add,
   subtract,

@@ -1,4 +1,4 @@
-import { strokePrimitive, init } from './canvas';
+import { strokePrimitive, fillPrimitive, init } from './canvas';
 import { compose } from './matrix';
 import {
   translate,
@@ -16,7 +16,7 @@ import Ticker from './ticker';
 
 const app = document.querySelector('#app')!;
 
-const main = () => {
+const stroke = () => {
   const width = 800;
   const height = 450;
   const near = -10; // 近平面
@@ -28,25 +28,15 @@ const main = () => {
   const rotateSpeed = 0.5;
 
   const canvas = init(width, height);
+  const ctx = canvas.getContext('2d')!;
+  app.append(canvas);
+
   const input = {
     x: false,
     y: false,
     z: false,
     shift: false,
   };
-
-  app.append(canvas);
-
-  const MVP = compose(
-    screenSpaceTranslate(width, height),
-    screenSpaceScale(height, near, fov),
-    orthographicProjection,
-    perspectiveProjection(near, far),
-  );
-
-  const ctx = canvas.getContext('2d')!;
-
-  const ticker = new Ticker();
 
   window.onkeydown = e => {
     const key = e.key.toLowerCase();
@@ -59,6 +49,15 @@ const main = () => {
     if (key !== 'x' && key !== 'y' && key !== 'z' && key != 'shift') return;
     input[key] = false;
   };
+
+  const MVP = compose(
+    screenSpaceTranslate(width, height),
+    screenSpaceScale(height, near, fov),
+    orthographicProjection,
+    perspectiveProjection(near, far),
+  );
+
+  const ticker = new Ticker();
 
   ticker.callbacks.push((deltaTime: number) => {
     const direction = input.shift ? -1 : 1;
@@ -83,6 +82,64 @@ const main = () => {
     strokePrimitive(ctx, primitives.cube, compose(MVP, transform));
   });
   ticker.start();
+};
+
+const fill = () => {
+  const width = 800;
+  const height = 450;
+  const near = -10; // 近平面
+  const far = -50; // 遠平面
+  const fov = Math.PI / 3;
+  let xRotation = 0;
+  let yRotation = 0;
+  let zRotation = 0;
+
+  const canvas = init(width, height);
+  const ctx = canvas.getContext('2d')!;
+  app.append(canvas);
+
+  const MVP = compose(
+    screenSpaceTranslate(width, height),
+    screenSpaceScale(height, near, fov),
+    orthographicProjection,
+    perspectiveProjection(near, far),
+  );
+
+  const draw = () => {
+    console.time('drawCall');
+    const transform = compose(
+      translate(0, 0, -20),
+      rotateZ(zRotation),
+      rotateY(yRotation),
+      rotateX(xRotation),
+      scale(8),
+    );
+    ctx.clearRect(0, 0, width, height);
+    fillPrimitive(ctx, primitives.cube, compose(MVP, transform), width, height);
+    console.timeEnd('drawCall');
+  };
+
+  draw();
+
+  window.onkeydown = e => {
+    const key = e.key.toLowerCase();
+    if (key === 'x') {
+      xRotation += 30 * (Math.PI / 180);
+    }
+    if (key === 'y') {
+      yRotation += 30 * (Math.PI / 180);
+    }
+    if (key === 'z') {
+      zRotation += 30 * (Math.PI / 180);
+    }
+
+    draw();
+  };
+};
+
+const main = {
+  stroke,
+  fill,
 };
 
 export default main;

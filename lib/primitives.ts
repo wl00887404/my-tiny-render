@@ -8,10 +8,10 @@ const t4 = vector.makeVector(0, Math.sqrt(8 / 3), 0, 1);
 
 // 邊長為 2 的正三角錐
 export const tetrahedron: Primitive = [
-  [t1, t2, t3],
-  [t1, t2, t4],
-  [t1, t3, t4],
-  [t2, t3, t4],
+  { points: [t1, t2, t3], color: 'red' },
+  { points: [t1, t2, t4], color: 'blue' },
+  { points: [t1, t3, t4], color: 'green' },
+  { points: [t2, t3, t4], color: 'yellow' },
 ];
 
 const c1 = vector.makeVector(1, -1, 1, 1);
@@ -26,12 +26,12 @@ const c8 = vector.makeVector(1, 1, -1, 1);
 
 // 邊長為 2 的 正方體
 export const cube: Primitive = [
-  [c1, c2, c3, c4],
-  [c5, c6, c7, c8],
-  [c1, c2, c6, c5],
-  [c4, c3, c7, c8],
-  [c1, c4, c8, c5],
-  [c2, c3, c7, c6],
+  { points: [c1, c2, c3, c4], color: 'red' },
+  { points: [c5, c6, c7, c8], color: 'red' },
+  { points: [c1, c2, c6, c5], color: 'blue' },
+  { points: [c4, c3, c7, c8], color: 'blue' },
+  { points: [c1, c4, c8, c5], color: 'green' },
+  { points: [c2, c3, c7, c6], color: 'green' },
 ];
 
 const primitives = { tetrahedron, cube };
