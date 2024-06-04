@@ -45,9 +45,9 @@ export const fillPrimitive = (
   primitive.forEach(face => {
     const positions = face.points.map(point => {
       const pos = vector.normalize(matrix.multiply(MVP, point));
+
       return vector.get(pos);
     });
-
     fillFace(ctx, positions, face.color, zBuffer);
   });
 };

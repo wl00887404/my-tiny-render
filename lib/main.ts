@@ -93,6 +93,7 @@ const fill = () => {
   let xRotation = 0;
   let yRotation = 0;
   let zRotation = 0;
+  const rotateSpeed = 30 * (Math.PI / 180);
 
   const canvas = init(width, height);
   const ctx = canvas.getContext('2d')!;
@@ -124,13 +125,13 @@ const fill = () => {
   window.onkeydown = e => {
     const key = e.key.toLowerCase();
     if (key === 'x') {
-      xRotation += 30 * (Math.PI / 180);
+      xRotation += rotateSpeed;
     }
     if (key === 'y') {
-      yRotation += 30 * (Math.PI / 180);
+      yRotation += rotateSpeed;
     }
     if (key === 'z') {
-      zRotation += 30 * (Math.PI / 180);
+      zRotation += rotateSpeed;
     }
 
     draw();
