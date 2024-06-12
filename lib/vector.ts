@@ -17,7 +17,9 @@ export const makeVector = (
 export const add: (v: Vector, w: Vector) => Vector = matrix.add;
 export const subtract: (v: Vector, w: Vector) => Vector = matrix.subtract;
 
-export const get = (v: Vector) => [v[0][0], v[1][0], v[2][0], v[3][0]];
+export const get = (v: Vector) => {
+  return v.map(x => x[0]);
+};
 
 export const scale: (v: Vector, k: number) => Vector = matrix.scale;
 
@@ -32,7 +34,7 @@ export const cross = (v: Vector, w: Vector): Vector => {
   const [x1, y1, z1] = get(v);
   const [x2, y2, z2] = get(w);
 
-  return makeVector(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2, 1);
+  return makeVector(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2, 0);
 };
 
 export const length = (v: Vector) => {
