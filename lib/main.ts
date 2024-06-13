@@ -90,10 +90,12 @@ const fill = () => {
   const near = -10; // 近平面
   const far = -50; // 遠平面
   const fov = Math.PI / 3;
+  const rotateSpeed = 30 * (Math.PI / 180);
+
   let xRotation = 0;
   let yRotation = 0;
   let zRotation = 0;
-  const rotateSpeed = 30 * (Math.PI / 180);
+  let msaaLevel = 1;
 
   const canvas = init(width, height);
   const ctx = canvas.getContext('2d')!;
@@ -116,22 +118,44 @@ const fill = () => {
       scale(8),
     );
     ctx.clearRect(0, 0, width, height);
-    fillPrimitive(ctx, primitives.cube, compose(MVP, transform), width, height);
+    fillPrimitive(
+      ctx,
+      primitives.cube,
+      compose(MVP, transform),
+      width,
+      height,
+      msaaLevel,
+    );
     console.timeEnd('drawCall');
   };
 
   draw();
 
+  const inputKeys = {
+    x: 'x',
+    y: 'y',
+    z: 'z',
+    m: 'm',
+  };
+
   window.onkeydown = e => {
     const key = e.key.toLowerCase();
-    if (key === 'x') {
+    if (!Object.values(inputKeys).includes(key)) return;
+
+    if (key === inputKeys.x) {
       xRotation += rotateSpeed;
     }
-    if (key === 'y') {
+    if (key === inputKeys.y) {
       yRotation += rotateSpeed;
     }
-    if (key === 'z') {
+    if (key === inputKeys.z) {
       zRotation += rotateSpeed;
+    }
+
+    if (key === inputKeys.m) {
+      const nextMsaaLevel =
+        Number(prompt('next msaa level: ', msaaLevel.toString())) || 1;
+      msaaLevel = nextMsaaLevel;
     }
 
     draw();
