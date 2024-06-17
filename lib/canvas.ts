@@ -72,7 +72,12 @@ export const fillPrimitive = (
   height: number,
   msaaLevel: number = 1,
 ) => {
-  const zBuffer = matrix.makeMatrix(width, height, -Infinity);
+  const frameBuffer: Color[][] = Array.from({ length: width * msaaLevel }, () =>
+    Array.from({ length: height * msaaLevel }, () => [1, 1, 1]),
+  );
+  const zBuffer: number[][] = Array.from({ length: width * msaaLevel }, () =>
+    Array.from({ length: height * msaaLevel }, () => -Infinity),
+  );
 
   primitive.forEach(face => {
     const positions = face.points.map(point => {
@@ -80,24 +85,43 @@ export const fillPrimitive = (
 
       return vector.get(pos);
     });
-    fillFace(ctx, positions, face.color, zBuffer, msaaLevel);
+    fillFace(positions, face.color, frameBuffer, zBuffer, msaaLevel);
   });
+
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const color = [0, 0, 0];
+
+      for (let i = 0; i < msaaLevel; i++) {
+        for (let j = 0; j < msaaLevel; j++) {
+          for (let k = 0; k < 3; k++) {
+            color[k] += frameBuffer[x * msaaLevel + i][y * msaaLevel + j][k];
+          }
+        }
+      }
+
+      for (let i = 0; i < 3; i++) color[i] /= msaaLevel * msaaLevel;
+
+      ctx.fillStyle = getColorString(color);
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
 };
 
 const fillFace = (
-  ctx: CanvasRenderingContext2D,
   positions: number[][],
   color: Color,
-  zBuffer: Matrix,
+  frameBuffer: Color[][],
+  zBuffer: number[][],
   msaaLevel: number = 1,
 ) => {
   // 假設是五邊形 ABCDE
   // 拆成三角形會是 ABC、ACD、ADE
   for (let i = 0; i < positions.length - 2; i++) {
     fillTriangle(
-      ctx,
       [positions[0], positions[i + 1], positions[i + 2]],
       color,
+      frameBuffer,
       zBuffer,
       msaaLevel,
     );
@@ -105,10 +129,10 @@ const fillFace = (
 };
 
 const fillTriangle = (
-  ctx: CanvasRenderingContext2D,
   trianglePositions: number[][],
   color: Color,
-  zBuffer: Matrix,
+  frameBuffer: Color[][],
+  zBuffer: number[][],
   msaaLevel: number = 1,
 ) => {
   const [top, right, bottom, left] = getBoundingBox(trianglePositions);
@@ -128,10 +152,6 @@ const fillTriangle = (
 
   for (let x = left; x < right; x++) {
     for (let y = top; y < bottom; y++) {
-      // TODO: 只有邊界要 msaa ，中心不用？
-      const msaaWeight = msaa(x, y, a, b, c, msaaLevel);
-      if (msaaWeight === 0) continue;
-
       const baryCoords = getBaryCoords(x + 0.5, y + 0.5, a, b, c, triangleArea);
 
       const z =
@@ -139,11 +159,20 @@ const fillTriangle = (
         baryCoords[1] * trianglePositions[1][2] +
         baryCoords[2] * trianglePositions[2][2];
 
-      if (zBuffer[x][y] > z) continue;
+      const space = 1 / msaaLevel / 2;
 
-      zBuffer[x][y] = z;
-      ctx.fillStyle = getColorString(color, msaaWeight);
-      ctx.fillRect(x, y, 1, 1);
+      for (let i = 0; i < msaaLevel; i++) {
+        for (let j = 0; j < msaaLevel; j++) {
+          const centerX = x + space + space * 2 * i;
+          const centerY = y + space + space * 2 * j;
+
+          if (zBuffer[x * msaaLevel + i][y * msaaLevel + j] > z) continue;
+          if (!isInsideTriangle(centerX, centerY, a, b, c)) continue;
+
+          zBuffer[x * msaaLevel + i][y * msaaLevel + j] = z;
+          frameBuffer[x * msaaLevel + i][y * msaaLevel + j] = color;
+        }
+      }
     }
   }
 };
@@ -174,31 +203,6 @@ export const getBaryCoords = (
   return crosses.map(cross => {
     return vector.length(cross) / triangleArea;
   });
-};
-
-const msaa = (
-  x: number,
-  y: number,
-  a: Vector,
-  b: Vector,
-  c: Vector,
-  level: number,
-) => {
-  const space = 1 / level / 2;
-  const weightPerSpace = 1 / level / level;
-  let weight = 0;
-  for (let i = 0; i < level; i++) {
-    for (let j = 0; j < level; j++) {
-      const centerX = x + space + space * 2 * i;
-      const centerY = y + space + space * 2 * j;
-      if (!isInsideTriangle(centerX, centerY, a, b, c)) {
-        continue;
-      }
-      weight += weightPerSpace;
-    }
-  }
-
-  return weight;
 };
 
 const isInsideTriangle = (
